@@ -25,7 +25,7 @@ Example request:
     }  
 }
 ```
-sent to http://localhost:9090/weather. More parameters can be found in **WeatherSchema** class.
+as **query** parameter in a POST (x-www-form-urlencoded) request sent to [http://localhost:9090/weather](http://localhost:9090/weather). More parameters can be found in **WeatherSchema** class.
 
 
 
