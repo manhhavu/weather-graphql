@@ -1,8 +1,6 @@
 package com.manhhavu.experiments.graphql
 
-import com.google.gson.Gson
 import graphql.GraphQL
-import okhttp3.OkHttpClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -13,7 +11,7 @@ open class Application {
 
     @Bean
     open fun weatherSchema(@Value("\${openweathermap.appid}") appId: String): WeatherSchema {
-        return WeatherSchema(appId, OkHttpClient(), Gson())
+        return WeatherSchema(appId)
     }
 
     @Bean

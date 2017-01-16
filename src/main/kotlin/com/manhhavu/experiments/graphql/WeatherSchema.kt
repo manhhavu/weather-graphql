@@ -1,18 +1,15 @@
 package com.manhhavu.experiments.graphql
 
-import com.google.gson.Gson
+import com.mashape.unirest.http.Unirest
 import graphql.Scalars.*
 import graphql.schema.GraphQLFieldDefinition.newFieldDefinition
 import graphql.schema.GraphQLObjectType
 import graphql.schema.GraphQLObjectType.newObject
 import graphql.schema.GraphQLSchema
-import okhttp3.OkHttpClient
-import okhttp3.Request
+
 import java.util.*
 
-class WeatherSchema constructor(val appId: String,
-                                val httpClient: OkHttpClient,
-                                val gson: Gson) {
+class WeatherSchema constructor(val appId: String) {
     val schema: GraphQLSchema
 
     init {
@@ -28,16 +25,9 @@ class WeatherSchema constructor(val appId: String,
                                     .map { "id=$it" }
                                     .orElse("q=${it.arguments["cityName"]}")
 
-                            val request = Request.Builder()
-                                    .url("http://api.openweathermap.org/data/2.5/weather?$query&APPID=$appId")
-                                    .get().build()
-
-                            val response = httpClient.newCall(request).execute().body().string()
-                            val json = gson.fromJson(response, Map::class.java)
-
-                            mapOf("id" to json["id"],
-                                  "name" to json["name"],
-                                  "main" to json["main"])
+                            Unirest.get("http://api.openweathermap.org/data/2.5/weather?$query&APPID=$appId")
+                                    .header("accept", "application/json")
+                                    .asJson().body.`object`.asMap()
                         })
                 .build()
         schema = GraphQLSchema.newSchema()
