@@ -8,6 +8,7 @@ import graphql.schema.GraphQLObjectType.newObject
 import graphql.schema.GraphQLSchema
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.*
 
 class WeatherSchema constructor(val appId: String,
                                 val httpClient: OkHttpClient,
@@ -16,16 +17,19 @@ class WeatherSchema constructor(val appId: String,
 
     init {
         val queryType = newObject()
-                .name("City")
+                .name("Query")
                 .field(newFieldDefinition()
-                        .name("weather")
+                        .name("location")
                         .type(weather(parameters()))
-                        .argument { it.name("city").type(GraphQLString).defaultValue("London") }
+                        .argument { it.name("cityName").type(GraphQLString).defaultValue("London") }
+                        .argument { it.name("id").type(GraphQLLong) }
                         .dataFetcher {
-                            val city = it.arguments["city"]
+                            val query = Optional.ofNullable(it.arguments["id"])
+                                    .map { "id=$it" }
+                                    .orElse("q=${it.arguments["cityName"]}")
 
                             val request = Request.Builder()
-                                    .url("http://api.openweathermap.org/data/2.5/weather?q=$city&APPID=$appId")
+                                    .url("http://api.openweathermap.org/data/2.5/weather?$query&APPID=$appId")
                                     .get().build()
 
                             val response = httpClient.newCall(request).execute().body().string()
@@ -45,8 +49,8 @@ class WeatherSchema constructor(val appId: String,
         return newObject()
                 .name("Parameters")
                 .field(newFieldDefinition().name("temp").type(GraphQLFloat))
-                .field(newFieldDefinition().name("pressure").type(GraphQLInt))
-                .field(newFieldDefinition().name("humidity").type(GraphQLInt))
+                .field(newFieldDefinition().name("pressure").type(GraphQLFloat))
+                .field(newFieldDefinition().name("humidity").type(GraphQLFloat))
                 .field(newFieldDefinition().name("temp_min").type(GraphQLFloat))
                 .field(newFieldDefinition().name("temp_max").type(GraphQLFloat))
     }
