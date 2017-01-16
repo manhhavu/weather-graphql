@@ -20,7 +20,7 @@ class WeatherSchema constructor(val appId: String,
                 .field(newFieldDefinition()
                         .name("weather")
                         .type(weather(parameters()))
-                        .argument { it.name("city").type(GraphQLString) }
+                        .argument { it.name("city").type(GraphQLString).defaultValue("London") }
                         .dataFetcher {
                             val city = it.arguments["city"]
 
