@@ -1,8 +1,9 @@
 package com.manhhavu.experiments.graphql
 
 import com.google.gson.Gson
-import graphql.Scalars
+import graphql.Scalars.*
 import graphql.schema.GraphQLFieldDefinition.newFieldDefinition
+import graphql.schema.GraphQLObjectType
 import graphql.schema.GraphQLObjectType.newObject
 import graphql.schema.GraphQLSchema
 import okhttp3.OkHttpClient
@@ -14,34 +15,17 @@ class WeatherSchema constructor(val appId: String,
     val schema: GraphQLSchema
 
     init {
-        val parameters = newObject()
-                .name("Parameters")
-                .field(newFieldDefinition().name("temp").type(Scalars.GraphQLFloat))
-                .field(newFieldDefinition().name("pressure").type(Scalars.GraphQLInt))
-                .field(newFieldDefinition().name("humidity").type(Scalars.GraphQLInt))
-                .field(newFieldDefinition().name("temp_min").type(Scalars.GraphQLFloat))
-                .field(newFieldDefinition().name("temp_max").type(Scalars.GraphQLFloat))
-
-        val weather = newObject()
-                .name("Weather")
-                .field(newFieldDefinition()
-                        .name("id")
-                        .type(Scalars.GraphQLFloat))
-                .field(newFieldDefinition()
-                        .name("name")
-                        .type(Scalars.GraphQLString))
-                .field(newFieldDefinition()
-                        .name("main")
-                        .type(parameters))
-
         val queryType = newObject()
                 .name("City")
                 .field(newFieldDefinition()
                         .name("weather")
-                        .type(weather)
+                        .type(weather(parameters()))
+                        .argument { it.name("city").type(GraphQLString) }
                         .dataFetcher {
+                            val city = it.arguments["city"]
+
                             val request = Request.Builder()
-                                    .url("http://api.openweathermap.org/data/2.5/weather?q=London&APPID=$appId")
+                                    .url("http://api.openweathermap.org/data/2.5/weather?q=$city&APPID=$appId")
                                     .get().build()
 
                             val response = httpClient.newCall(request).execute().body().string()
@@ -55,5 +39,29 @@ class WeatherSchema constructor(val appId: String,
         schema = GraphQLSchema.newSchema()
                 .query(queryType)
                 .build()
+    }
+
+    private fun parameters(): GraphQLObjectType.Builder? {
+        return newObject()
+                .name("Parameters")
+                .field(newFieldDefinition().name("temp").type(GraphQLFloat))
+                .field(newFieldDefinition().name("pressure").type(GraphQLInt))
+                .field(newFieldDefinition().name("humidity").type(GraphQLInt))
+                .field(newFieldDefinition().name("temp_min").type(GraphQLFloat))
+                .field(newFieldDefinition().name("temp_max").type(GraphQLFloat))
+    }
+
+    private fun weather(parameters: GraphQLObjectType.Builder?): GraphQLObjectType.Builder? {
+        return newObject()
+                .name("Weather")
+                .field(newFieldDefinition()
+                        .name("id")
+                        .type(GraphQLFloat))
+                .field(newFieldDefinition()
+                        .name("name")
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name("main")
+                        .type(parameters))
     }
 }

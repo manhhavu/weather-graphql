@@ -9,7 +9,7 @@ You need to specify a OpenWeatherMap APPID as an environment variable (OWM_ID).
 Example request:
 ```
 {  
-    weather { 
+    weather(city: "London") { 
         id 
         name 
         main { 
