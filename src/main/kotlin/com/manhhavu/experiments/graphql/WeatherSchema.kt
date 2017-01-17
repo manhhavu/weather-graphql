@@ -31,8 +31,6 @@ class WeatherSchema constructor(val appId: String) {
                                     .header("accept", "application/json")
                                     .asJson().body.`object`.asMap()
 
-                            it.arguments
-
                             mapOf("id"   to response["id"],
                                   "name" to response["name"],
                                   "now"  to mapOf("main"    to response["main"],
