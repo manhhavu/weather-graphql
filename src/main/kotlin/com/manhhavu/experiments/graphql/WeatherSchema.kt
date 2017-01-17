@@ -31,6 +31,8 @@ class WeatherSchema constructor(val appId: String) {
                                     .header("accept", "application/json")
                                     .asJson().body.`object`.asMap()
 
+                            it.arguments
+
                             mapOf("id"   to response["id"],
                                   "name" to response["name"],
                                   "now"  to mapOf("main"    to response["main"],
@@ -59,7 +61,8 @@ class WeatherSchema constructor(val appId: String) {
                         .name("forecasts")
                         .type(GraphQLList(dayForecast().build()))
                         .dataFetcher {
-                            val query = "q=London"
+                            val source = it.source as Map<String, Any>
+                            val query = "id=${source["id"]}"
                             val response = Unirest.get("$endpoint/forecast?$query&APPID=$appId")
                                     .header("accept", "application/json")
                                     .asJson().body.`object`.asMap()
